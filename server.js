@@ -48,7 +48,16 @@
            res.writeHead(200, {'Content-Type': 'text/html'});
            res.end(data);
          })
-       }
+       } else if(req.url === '/contact.html') {
+          //in the root directory access public folder, UTF - universal transformation format
+          fs.readFile('./public/contact.html', 'UTF-8', (err,data)=>{
+            //if successful what happens
+            if(err) throw err;
+            //if everithing is fine we want data
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.end(data);
+          })
+        }
    }//method
 
  });
