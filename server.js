@@ -12,6 +12,7 @@
  const http = require('http'); //provides server
  const fs = require('fs'); //use this for file transaction
  const path = require ('path');
+ const qs = require('querystring');
 
 //we created server
  const server = http.createServer((req, res)=>{
@@ -19,7 +20,7 @@
    // res.write("Hello");
    // res.end();
    console.log(`${req.method} request for ${req.url} `);
-//if user wants to check page
+   //if user wants to check page
    if(req.method === 'GET'){
      if(req.url === '/') {
        //in the root directory access public folder, UTF - universal transformation format
@@ -48,7 +49,7 @@
            res.writeHead(200, {'Content-Type': 'text/html'});
            res.end(data);
          })
-       } else if(req.url === '/contact.html') {
+      } else if(req.url === '/contact.html') {
           //in the root directory access public folder, UTF - universal transformation format
           fs.readFile('./public/contact.html', 'UTF-8', (err,data)=>{
             //if successful what happens
@@ -57,9 +58,65 @@
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end(data);
           })
-        }
-   }//method
+      } else if(req.url.match('/node_modules/')) {
+        const nodePath = path.join(__dirname, req.url);
+        fs.readFile(nodePath, 'UTF-8', (err,data)=>{
+          //if successful what happens
+          if(err) throw err;
+          //if everithing is fine we want data
+          res.writeHead(200, {'Content-Type': 'text/css'});
+          res.end(data);
+        })
+      } else if(req.url.match('/css/')) {
+        const cssPath = path.join(__dirname, 'public', req.url);
+        fs.readFile(cssPath, 'UTF-8', (err,data)=>{
+          //if successful what happens
+          if(err) throw err;
+          //if everithing is fine we want data
+          res.writeHead(200, {'Content-Type': 'text/css'});
+          res.end(data);
+        })
+      } else if(req.url.match('/js/')) {
+        const jsPath = path.join(__dirname, 'public', req.url);
+        fs.readFile(jsPath, 'UTF-8', (err,data)=>{
+          //if successful what happens
+          if(err) throw err;
+          //if everithing is fine we want data
+          res.writeHead(200, {'Content-Type': 'text/js'});
+          res.end(data);
+        })
+      } else if(req.url.match(/images/)) {
+        //'UTF-8' means text
+        const imagePath = path.join(__dirname, 'public', req.url);
+        fs.readFile(imagePath,  (err,data)=>{
+          //if successful what happens
+          if(err) throw err;
+          //if everithing is fine we want data
+          res.writeHead(200, {'Content-Type': 'image/jpg'});
+          res.end(data);
+        })
+      }
+   } else if (req.method === 'POST') {
+     if(req.url === '/sendForm') {
+       console.log('form submitted');
+       let body = '';
+       req.on('data', function(data){
+         body += data;
+       });
+       req.on('end', function(){
+         console.log('form data ends');
+         console.log(body.toString());
+         const formData = qs.parse(body.toString());
+         console.log(formData);
+       })
 
+     }
+   }
+
+   else {
+     res.writeHead(200, {'Content-Type': 'plain/text'});
+     res.end('404-file not fount');
+   }
  });
 
  server.listen(3000);
